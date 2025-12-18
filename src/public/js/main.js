@@ -85,90 +85,17 @@ let unsubscribeConfig = null;
 let unsubscribeHistory = null;
 let systemDarkModeListener = null;
 
-// --- INICIALIZACIÓN ---
-async function init() {
-    // 1. Cargar config local
-    const savedId = localStorage.getItem('transmi_user_id');
-    const savedTheme = localStorage.getItem('transmi_theme');
-    const savedMode = localStorage.getItem('transmi_mode');
-    
-    if (savedTheme && THEMES[savedTheme]) {
-        applyTheme(savedTheme);
-    } else {
-        applyTheme('verde');
-    }
-
-    if (savedMode && ['light', 'dark', 'system'].includes(savedMode)) {
-        applyThemeMode(savedMode);
-    } else {
-        applyThemeMode('system');
-    }
-
-    // System changes listener
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    systemDarkModeListener = (e) => {
-        if (state.activeMode === 'system') {
-            applyThemeMode('system'); // Re-evaluate
-        }
-    };
-    mediaQuery.addEventListener('change', systemDarkModeListener);
-
-    if (savedId) {
-        state.userId = savedId;
-        showApp();
-    } else {
-        showLogin();
-    }
-
-    // 2. Inicializar Firebase
-    try {
-        app = initializeApp(firebaseConfig);
-        auth = getAuth(app);
-        db = getFirestore(app);
-        
-        // Auth listener
-        onAuthStateChanged(auth, (user) => {
-            state.currentUser = user;
-            if (user && state.userId) {
-                subscribeToData();
-            }
-        });
-
-        // Login anónimo
-        await signInAnonymously(auth);
-
-    } catch (e) {
-        console.error("Error inicializando Firebase:", e);
-        showToast("Error de conexión (Configura firebaseConfig en main.js)", "error");
-    }
-
-    // 3. Setup Listeners UI
-    setupEventListeners();
-    
-    // 4. Render inicial
-    updatePlanner();
-    renderDOM();
+// --- LOGICA DE LOGIN ---
+function handleLogin(inputName) {
+    const cleanId = inputName.toLowerCase().replace(/\s+/g, '-');
+    state.userId = cleanId;
+    localStorage.setItem('transmi_user_id', cleanId);
+    showApp();
+    if (state.currentUser) subscribeToData();
 }
 
-function setupEventListeners() {
-    // Login
-    const loginForm = document.getElementById('login-form');
-    if (loginForm) {
-        loginForm.addEventListener('submit', (e) => {
-            e.preventDefault(); // CRITICAL: Prevent reload
-            const input = document.getElementById('userIdInput').value.trim();
-            if (input.length > 2) {
-                const cleanId = input.toLowerCase().replace(/\s+/g, '-');
-                state.userId = cleanId;
-                localStorage.setItem('transmi_user_id', cleanId);
-                showApp();
-                if (state.currentUser) subscribeToData();
-            } else {
-                showToast('Ingresa un nombre válido', 'error');
-            }
-        });
-    }
-
+// --- EVENT LISTENERS SECUNDARIOS ---
+function setupSecondaryListeners() {
     // Logout
     document.getElementById('logout-btn').addEventListener('click', () => {
         if(confirm('¿Salir?')) {
@@ -237,6 +164,93 @@ function setupEventListeners() {
     cardContainer.addEventListener('touchmove', (e) => handleTilt(e, cardContainer));
     cardContainer.addEventListener('touchend', () => resetTilt());
 }
+
+// --- BOOTSTRAP ---
+document.addEventListener('DOMContentLoaded', async () => {
+    console.log("App starting...");
+
+    // 1. LOGIN FORM HARDENING
+    const loginForm = document.getElementById('login-form');
+    const userIdInput = document.getElementById('userIdInput');
+
+    if (loginForm) {
+        console.log("Formulario encontrado, adjuntando listener...");
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault(); // CRITICAL: Detiene la recarga
+            console.log("Submit detenido. Ejecutando login...");
+            
+            const nombre = userIdInput.value ? userIdInput.value.trim() : '';
+            if (nombre.length > 2) {
+                handleLogin(nombre);
+            } else {
+                showToast('Ingresa un nombre válido', 'error');
+            }
+        });
+    } else {
+        console.error("ERROR: No se encontró el formulario #login-form");
+    }
+
+    // 2. CONFIGURACIÓN INICIAL
+    const savedId = localStorage.getItem('transmi_user_id');
+    const savedTheme = localStorage.getItem('transmi_theme');
+    const savedMode = localStorage.getItem('transmi_mode');
+    
+    if (savedTheme && THEMES[savedTheme]) {
+        applyTheme(savedTheme);
+    } else {
+        applyTheme('verde');
+    }
+
+    if (savedMode && ['light', 'dark', 'system'].includes(savedMode)) {
+        applyThemeMode(savedMode);
+    } else {
+        applyThemeMode('system');
+    }
+
+    // System changes listener
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    systemDarkModeListener = (e) => {
+        if (state.activeMode === 'system') {
+            applyThemeMode('system'); // Re-evaluate
+        }
+    };
+    mediaQuery.addEventListener('change', systemDarkModeListener);
+
+    if (savedId) {
+        state.userId = savedId;
+        showApp();
+    } else {
+        showLogin();
+    }
+
+    // 3. FIREBASE
+    try {
+        app = initializeApp(firebaseConfig);
+        auth = getAuth(app);
+        db = getFirestore(app);
+        
+        onAuthStateChanged(auth, (user) => {
+            state.currentUser = user;
+            if (user && state.userId) {
+                subscribeToData();
+            }
+        });
+
+        await signInAnonymously(auth);
+
+    } catch (e) {
+        console.error("Error inicializando Firebase:", e);
+        showToast("Error de conexión (Configura firebaseConfig en main.js)", "error");
+    }
+
+    // 4. SECONDARY LISTENERS
+    setupSecondaryListeners();
+    
+    // 5. RENDER
+    updatePlanner();
+    renderDOM();
+});
+
 
 // --- LOGICA DE VISTAS ---
 
@@ -645,9 +659,6 @@ function resetTilt() {
     glare.style.background = 'none';
 }
 
-// Start
-init();
-
 // --- DARK MODE ---
 
 function applyThemeMode(mode) {
@@ -702,6 +713,3 @@ function toggleMode() {
 }
 
 window.toggleMode = toggleMode;
-
-// Initialize App
-document.addEventListener('DOMContentLoaded', init);
