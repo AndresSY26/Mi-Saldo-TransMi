@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Saldo TransMi</title>
+    
+    <!-- Google Fonts: Inter/Roboto -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Roboto+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['Roboto Mono', 'monospace'],
+                    },
+                    screens: {
+                        'tv': '1920px', // Extra large screen support if needed
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="/css/styles.css">
+    <style>
+        /* Focus styles helper for TV navigation */
+        .tv-focus:focus-visible {
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.5); /* Default fallback */
+            transform: scale(1.02);
+            z-index: 50;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900 min-h-screen overflow-x-hidden selection:bg-emerald-200 transition-colors duration-500" data-theme-key="selection">
+
+    <!-- App Container -->
+    <div id="app-container" class="min-h-screen font-sans">
+      
+        <!-- ================= LOGIN OVERLAY ================= -->
+        <div id="login-overlay" class="fixed inset-0 z-50 flex items-center justify-center p-6 bg-white/90 dark:bg-gray-900/90 backdrop-blur-md transition-opacity duration-300">
+            <div class="w-full max-w-md p-8 bg-white dark:bg-gray-800 rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-700 transform transition-all animate-fade-in-up">
+                <div class="text-center mb-10">
+                    <div id="login-icon-bg" class="inline-block p-4 rounded-full mb-4 bg-emerald-50 dark:bg-gray-700" data-theme-key="bgIcon">
+                        <svg id="login-icon-svg" class="w-12 h-12 text-emerald-600" data-theme-key="accentColor" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    </div>
+                    <h1 class="text-3xl font-bold text-gray-900 dark:text-white tracking-tight lg:text-4xl">Mi Saldo TransMi</h1>
+                    <p class="text-gray-500 dark:text-gray-400 mt-2 lg:text-lg">Gestiona tu tarjeta como un profesional</p>
+                </div>
+              
+                <form id="login-form" class="space-y-6">
+                    <!-- INPUT ESTILO GOOGLE -->
+                    <div class="relative w-full group">
+                        <input 
+                            type="text" 
+                            id="userIdInput"
+                            name="userIdInput"
+                            placeholder=" "
+                            tabindex="0"
+                            class="block w-full px-4 pt-4 pb-2 text-gray-900 dark:text-white bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-xl appearance-none focus:outline-none focus:ring-4 focus:ring-offset-2 focus:border-emerald-600 peer transition-all lg:text-lg lg:p-5 lg:pb-3"
+                            data-theme-key="inputBorder ringColor"
+                        />
+                        <label 
+                            for="userIdInput" 
+                            class="absolute text-sm text-gray-500 dark:text-gray-400 duration-300 transform -translate-y-4 scale-75 top-2 z-10 origin-[0] bg-white dark:bg-gray-700 px-2 peer-focus:px-2 peer-placeholder-shown:scale-100 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:top-1/2 peer-focus:top-2 peer-focus:scale-75 peer-focus:-translate-y-4 left-3 peer-focus:text-emerald-600 lg:text-base lg:peer-focus:-translate-y-5"
+                            data-theme-key="inputLabel"
+                        >
+                            Tu Nombre o Alias
+                        </label>
+                    </div>
+
+                    <button 
+                        type="submit"
+                        tabindex="0"
+                        class="w-full py-3.5 px-4 bg-gradient-to-r text-white font-bold rounded-xl shadow-lg transition-all transform hover:scale-[1.02] active:scale-[0.98] focus:ring-4 focus:ring-offset-2 focus:outline-none from-emerald-600 to-emerald-700 lg:text-lg lg:py-4"
+                        data-theme-key="buttonGradient ringColor">
+                        Ingresar
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- ================= MAIN APP ================= -->
+        <div id="main-interface" class="hidden pb-24 lg:pb-10">
+            
+            <!-- NAVBAR GLASSMORPHISM -->
+            <nav class="sticky top-0 z-40 w-full bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-100 dark:border-gray-800 shadow-sm">
+                <div class="max-w-md md:max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+                    <div class="flex items-center space-x-2">
+                        <div id="nav-logo-bg" class="w-8 h-8 rounded-lg bg-gradient-to-tr flex items-center justify-center text-white font-bold shadow-md from-[#009c3b] to-[#004d26] lg:w-10 lg:h-10 lg:text-xl" data-theme-key="gradientCard">
+                            T
+                        </div>
+                        <span class="font-bold text-gray-800 dark:text-white tracking-tight lg:text-xl">TransMi<span id="nav-text-accent" class="text-emerald-600" data-theme-key="accentColor">App</span></span>
+                    </div>
+
+                    <div class="flex items-center space-x-3">
+              <!-- Mode Toggle -->
+              <button
+                id="mode-toggle-btn"
+                tabindex="0"
+                class="p-2 text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors focus:outline-none"
+                title="Cambiar Modo"
+              >
+                  <!-- Icon placeholder, filled by JS -->
+                  <svg class="w-5 h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+              </button>
+
+              <!-- Theme Selector -->
+              <div class="relative">
+                            <button id="theme-menu-btn" tabindex="0" class="p-2 rounded-full hover:bg-gray-100 transition-colors group focus:outline-none" data-theme-key="ringColor">
+                                <span id="theme-indicator" class="w-5 h-5 block rounded-full border border-white shadow-sm bg-gradient-to-tr from-[#009c3b] to-[#004d26] lg:w-6 lg:h-6" data-theme-key="gradientCard"></span>
+                            </button>
+                            
+                            <!-- Dropdown -->
+                            <div id="theme-menu" class="hidden absolute right-0 top-full mt-2 w-36 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 p-2 z-50 animate-fade-in lg:w-48">
+                                <!-- Themes generated by JS -->
+                            </div>
+                        </div>
+
+                        <button id="logout-btn" tabindex="0" class="p-2 text-gray-400 hover:text-red-500 transition-colors focus:ring-4 focus:ring-offset-2 focus:outline-none focus:text-red-500 rounded-full focus:ring-red-200" title="Salir">
+                            <svg class="w-5 h-5 lg:w-7 lg:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path></svg>
+                        </button>
+                    </div>
+                </div>
+            </nav>
+
+            <!-- MAIN GRID LAYOUT -->
+            <main class="max-w-md md:max-w-5xl mx-auto px-4 pt-6 space-y-8 md:space-y-0 md:grid md:grid-cols-2 md:gap-8 lg:gap-16 md:items-start lg:pt-10">
+              
+                <!-- ================= LEFT COLUMN: 3D CARD (STICKY) ================= -->
+                <div class="md:sticky md:top-24 w-full max-w-md mx-auto md:max-w-none flex flex-col justify-center">
+                    <div id="card-container" tabindex="0" class="perspective-1000 select-none cursor-pointer focus:outline-none focus:ring-4 focus:ring-offset-8 rounded-3xl transition-all outline-none" data-theme-key="ringColor">
+                        
+                        <div id="card-element" 
+                             class="relative w-full aspect-[1.586/1] rounded-2xl transition-transform duration-100 ease-out transform-style-3d shadow-emerald-500/40 lg:max-w-lg lg:mx-auto"
+                             data-theme-key="shadow">
+                        
+                            <!-- Card Background & Structure -->
+                            <div class="absolute inset-0 rounded-2xl overflow-hidden bg-white">
+                                <!-- Zona Izquierda (Color) -->
+                                <div class="absolute inset-0 z-0 rounded-2xl overflow-hidden">
+                                    <svg viewBox="0 0 400 253" preserveAspectRatio="none" class="w-full h-full">
+                                        <defs>
+                                            <linearGradient id="card-gradient-def" x1="0" y1="0" x2="1" y2="1">
+                                                <stop id="stop1" offset="0%" stop-color="#009c3b"/>
+                                                <stop id="stop2" offset="100%" stop-color="#004d26"/>
+                                            </linearGradient>
+                                        </defs>
+                                        <path d="M0 0 L280 0 Q340 126 280 253 L0 253 Z" fill="url(#card-gradient-def)" />
+                                    </svg>
+                                </div>
+                                
+                                <div class="absolute inset-0 opacity-10 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] mix-blend-overlay pointer-events-none rounded-2xl" 
+                                     style="clip-path: path('M0 0 L280 0 Q340 126 280 253 L0 253 Z')"></div>
+                                
+                                <div id="shine-layer" class="absolute inset-0 rounded-2xl z-20 pointer-events-none mix-blend-overlay"></div>
+
+                                <!-- Contenido -->
+                                <div class="relative h-full p-5 flex flex-col justify-between z-10" style="transform: translateZ(20px);">
+                                    <div class="flex justify-between items-start">
+                                        <div class="text-white mt-1 w-2/3">
+                                            <span class="text-3xl lg:text-4xl font-extrabold tracking-tighter italic drop-shadow-md" style="font-family: sans-serif;">tullave</span>
+                                            <p class="text-[6px] lg:text-[8px] opacity-90 font-light tracking-[0.2em] uppercase leading-tight mt-[-2px] text-white/90">SISTEMA INTEGRADO<br>DE TRANSPORTE PÚBLICO</p>
+                                        </div>
+                                        <div class="flex flex-col items-end gap-2 w-1/3">
+                                            <div class="flex flex-col items-center opacity-80 grayscale-[30%]">
+                                                <div class="text-[5px] lg:text-[7px] text-gray-800 font-bold uppercase tracking-widest text-center leading-tight">
+                                                    ALCALDÍA MAYOR<br>DE BOGOTÁ D.C.
+                                                </div>
+                                                <div class="flex w-5 mt-0.5 h-[2px]">
+                                                    <div class="w-1/2 bg-[#d92828]"></div>
+                                                    <div class="w-1/2 bg-[#facc15]"></div>
+                                                </div>
+                                            </div>
+                                            <div class="flex gap-[2px] mt-1 pr-1">
+                                                <div class="w-[3px] h-2.5 bg-[#005c9e] rounded-[1px]"></div>
+                                                <div class="w-[3px] h-2.5 bg-[#facc15] rounded-[1px]"></div>
+                                                <div class="w-[3px] h-2.5 bg-[#d92828] rounded-[1px]"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex items-center gap-4 my-1 pl-1">
+                                        <div class="w-11 h-8 lg:w-14 lg:h-10 bg-gradient-to-br from-[#fde68a] via-[#fbbf24] to-[#b45309] rounded-[4px] border border-[#b45309]/30 shadow-lg flex items-center justify-center relative overflow-hidden" style="transform: translateZ(5px);">
+                                            <div class="absolute inset-0 border-[0.5px] border-black/10 rounded-[3px]"></div>
+                                            <svg width="100%" height="100%" viewBox="0 0 40 30" class="opacity-30 mix-blend-multiply">
+                                                <path d="M13 0 V30 M27 0 V30 M0 15 H40 M13 8 H27 M13 22 H27" stroke="#451a03" stroke-width="0.5" fill="none"/>
+                                                <rect x="16" y="10" width="8" height="10" rx="1" stroke="#451a03" stroke-width="0.5" fill="none"/>
+                                            </svg>
+                                            <div class="absolute inset-0 bg-gradient-to-tr from-transparent via-white/40 to-transparent opacity-50"></div>
+                                        </div>
+                                        <svg class="text-white/80 drop-shadow-sm rotate-90 w-5 h-5 lg:w-7 lg:h-7" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" y1="20" x2="12.01" y2="20"/></svg>
+                                    </div>
+
+                                    <div class="flex justify-between items-end mt-1">
+                                        <div class="text-white">
+                                            <p class="text-[7px] lg:text-[9px] uppercase tracking-[0.15em] opacity-80 mb-0 font-medium text-shadow-sm">Saldo Disponible</p>
+                                            <h3 id="card-balance" class="text-[28px] lg:text-[36px] font-mono tracking-wide font-bold drop-shadow-lg leading-none mt-1">
+                                                $ 0
+                                            </h3>
+                                        </div>
+                                        <div class="text-right pr-1 pb-1">
+                                            <p class="text-[10px] lg:text-xs font-mono font-medium tracking-tight text-gray-400/80 uppercase mb-0.5">Usuario</p>
+                                            <p id="card-user" class="text-sm lg:text-base font-mono font-bold tracking-tight text-gray-700 uppercase truncate max-w-[100px]" style="font-family: 'Courier New', monospace;">
+                                                Nombre
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div id="glare-layer" class="absolute inset-0 z-30 pointer-events-none mix-blend-overlay"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ================= RIGHT COLUMN: INTERACTION & HISTORY ================= -->
+                <div class="space-y-6 w-full max-w-md mx-auto md:max-w-none">
+                    
+                    <!-- TABS NAVIGATION -->
+                    <div class="bg-white dark:bg-gray-800 p-1.5 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 flex relative lg:p-2">
+                        <div id="tab-slider" class="absolute top-1.5 bottom-1.5 w-[48%] bg-gray-100 dark:bg-gray-700 rounded-lg transition-all duration-300 ease-in-out left-[1.5%] lg:top-2 lg:bottom-2"></div>
+                        <button id="btn-tab-saldo" tabindex="0" class="flex-1 relative z-10 py-2.5 text-sm font-bold rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 text-gray-900 dark:text-white focus:outline-none focus:ring-4 focus:ring-offset-2 lg:text-base lg:py-3" data-theme-key="ringColor">
+                            <svg class="w-4 h-4 lg:w-5 lg:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"></path></svg>
+                            Mi Saldo
+                        </button>
+                        <button id="btn-tab-planner" tabindex="0" class="flex-1 relative z-10 py-2.5 text-sm font-bold rounded-lg transition-colors duration-200 flex items-center justify-center gap-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 focus:outline-none focus:ring-4 focus:ring-offset-2 lg:text-base lg:py-3" data-theme-key="ringColor">
+                            <svg class="w-4 h-4 lg:w-5 lg:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                            Planificador
+                        </button>
+                    </div>
+
+                    <!-- TAB CONTENT: MI SALDO -->
+                    <div id="tab-content-saldo" class="space-y-6 animate-fade-in block">
+                        <!-- Proyección -->
+                        <div class="bg-white dark:bg-gray-800 rounded-2xl p-5 shadow-sm border border-gray-100 dark:border-gray-700 flex items-center justify-between lg:p-6">
+                            <div class="flex items-center gap-4 lg:gap-6">
+                                <div id="projection-icon-bg" class="w-12 h-12 lg:w-16 lg:h-16 flex items-center justify-center rounded-full transition-colors shrink-0 bg-emerald-50 dark:bg-gray-700 text-emerald-600" data-theme-key="bgIcon"> 
+                                    <svg class="w-6 h-6 lg:w-8 lg:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] lg:text-xs text-gray-400 dark:text-gray-400 font-bold uppercase tracking-wider mb-0.5">Te alcanza hasta</p>
+                                    <p id="projection-date" class="text-gray-900 dark:text-white font-bold text-lg lg:text-2xl leading-tight capitalize">...</p>
+                                    <span id="projection-days" class="text-[11px] lg:text-sm font-medium block mt-0.5 text-gray-400">... días restantes</span>
+                                </div>
+                            </div>
+                            <div class="flex flex-col items-center justify-center bg-gray-50 dark:bg-gray-700 rounded-xl p-1 border border-gray-100 dark:border-gray-600 ml-2 shadow-inner lg:p-2">
+                                <button id="btn-inc-viajes" tabindex="0" class="w-8 h-7 lg:w-10 lg:h-9 flex items-center justify-center text-gray-400 hover:text-gray-700 dark:hover:text-white hover:bg-white dark:hover:bg-gray-600 hover:shadow-sm rounded-lg transition-all mb-1 focus:outline-none focus:ring-2 focus:ring-emerald-500" data-theme-key="ringColor">
+                                    <svg class="w-3 h-3 lg:w-4 lg:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7"></path></svg>
+                                </button>
+                                <span id="label-viajes" class="w-8 lg:w-10 text-center text-xs lg:text-sm font-bold text-gray-800 dark:text-white leading-none py-0.5">2</span>
+                                <span class="text-[9px] lg:text-[10px] text-gray-400 uppercase">viajes</span>
+                                <button id="btn-dec-viajes" tabindex="0" class="w-8 h-7 lg:w-10 lg:h-9 flex items-center justify-center text-gray-400 hover:text-gray-700 dark:hover:text-white hover:bg-white dark:hover:bg-gray-600 hover:shadow-sm rounded-lg transition-all mt-1 focus:outline-none focus:ring-2 focus:ring-emerald-500" data-theme-key="ringColor">
+                                    <svg class="w-3 h-3 lg:w-4 lg:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Acciones -->
+                        <div>
+                            <h3 class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest pl-1 mb-3 lg:text-sm lg:mb-4">Acciones Rápidas</h3>
+                            <div class="grid grid-cols-2 gap-4 lg:gap-6">
+                                <button id="btn-action-day" tabindex="0" class="relative overflow-hidden group bg-white dark:bg-gray-800 p-5 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 hover:shadow-lg hover:border-red-100 dark:hover:border-red-900/40 hover:-translate-y-1 transition-all text-left duration-300 focus:outline-none focus:ring-4 focus:ring-red-100 lg:p-6">
+                                    <div class="absolute top-0 right-0 p-3 opacity-[0.03] group-hover:opacity-10 group-hover:scale-110 transition-transform">
+                                        <svg class="text-red-500 w-20 h-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                                    </div>
+                                    <div class="w-12 h-12 lg:w-14 lg:h-14 bg-red-50 dark:bg-gray-700 rounded-2xl flex items-center justify-center text-red-500 mb-3 group-hover:bg-red-500 group-hover:text-white transition-colors shadow-sm">
+                                        <svg class="w-6 h-6 lg:w-8 lg:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                    </div>
+                                    <p class="font-bold text-gray-900 dark:text-white text-sm lg:text-base">Usar Día Completo</p>
+                                    <p id="label-cost-day" class="text-[10px] lg:text-xs font-medium text-gray-400 mt-0.5">...</p>
+                                </button>
+
+                                <div class="flex flex-col gap-3 lg:gap-4">
+                                    <button id="btn-action-single" tabindex="0" class="bg-white dark:bg-gray-800 p-4 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors group focus:outline-none focus:ring-4 focus:ring-gray-100 lg:p-5">
+                                        <div class="flex items-center gap-3">
+                                            <div class="w-8 h-8 lg:w-10 lg:h-10 rounded-full bg-red-50 dark:bg-gray-700 text-red-500 flex items-center justify-center">
+                                                <svg class="w-4 h-4 lg:w-5 lg:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12H9m12 0a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                            </div>
+                                            <div>
+                                                <p class="text-xs lg:text-sm font-bold text-gray-800 dark:text-white">1 Pasaje</p>
+                                                <p class="text-[9px] lg:text-xs text-gray-400">-$3.200</p>
+                                            </div>
+                                        </div>
+                                    </button>
+                                    <div class="bg-white dark:bg-gray-800 p-4 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700 flex flex-col justify-between hover:shadow-md transition-all lg:p-5 dark:hover:bg-gray-750">
+                                        <div class="flex justify-between items-center">
+                                            <input 
+                                                type="number" 
+                                                id="input-recharge"
+                                                placeholder="0" 
+                                                tabindex="0"
+                                                class="w-20 lg:w-28 pl-2 bg-transparent border-b border-gray-100 dark:border-gray-600 outline-none font-mono text-sm lg:text-base font-bold text-gray-900 dark:text-white placeholder-gray-200 dark:placeholder-gray-500 transition-colors focus:border-current text-emerald-600 focus:ring-0"
+                                                data-theme-key="accentColor"
+                                            />
+                                            <button id="btn-action-recharge" tabindex="0" class="hover:bg-gray-50 dark:hover:bg-gray-700 p-2 rounded-xl transition-colors disabled:opacity-30 disabled:cursor-not-allowed text-emerald-600 focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-emerald-500" data-theme-key="accentColor ringColor">
+                                                <svg class="w-5 h-5 lg:w-6 lg:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
+                                            </button>
+                                        </div>
+                                        <p class="text-[9px] lg:text-xs text-gray-400 mt-1 uppercase tracking-wide font-medium">Recargar Saldo</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Historial -->
+                        <div class="pb-4">
+                            <div class="flex items-center justify-between mb-4 pl-1">
+                                <h3 class="text-xs font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest lg:text-sm">Actividad Reciente</h3>
+                                <button id="btn-clear-history" tabindex="0" class="text-[10px] lg:text-xs text-red-400 hover:text-red-600 hover:bg-red-50 px-3 py-1 rounded-full transition-colors font-medium focus:outline-none focus:ring-2 focus:ring-red-200">Limpiar Todo</button>
+                            </div>
+                            
+                            <div id="history-list" class="space-y-3 lg:space-y-4">
+                               <!-- Injected by JS -->
+                               <div class="text-center py-10 bg-white rounded-3xl border border-dashed border-gray-200">
+                                   <p class="text-gray-400 text-xs font-medium lg:text-sm">Cargando...</p>
+                               </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TAB CONTENT: PLANNER -->
+                    <div id="tab-content-planner" class="space-y-6 animate-fade-in hidden">
+                        
+                        <div class="mt-4 mb-2">
+                            <h2 class="text-2xl font-bold text-gray-800 dark:text-white tracking-tight lg:text-3xl">Planificador</h2>
+                            <p class="text-sm text-gray-400 lg:text-base">Calcula tu presupuesto mensual.</p>
+                        </div>
+
+                        <div class="bg-white dark:bg-gray-800 rounded-3xl p-6 shadow-sm border border-gray-100 dark:border-gray-700 space-y-6 relative overflow-hidden lg:p-8">
+                            <div id="planner-deco-blob" class="absolute top-0 right-0 w-24 h-24 rounded-full filter blur-3xl opacity-10 pointer-events-none -mr-10 -mt-10 bg-gradient-to-br from-[#009c3b] to-[#004d26]" data-theme-key="gradientCard"></div>
+
+                            <div class="relative group">
+                                <label class="block text-xs font-bold uppercase tracking-wider mb-2 pl-1 transition-colors text-emerald-600" data-theme-key="accentColor">¿Hasta cuándo?</label>
+                                <div class="relative">
+                                    <input type="date" id="planner-date-input" tabindex="0" class="w-full px-4 py-3.5 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-gray-800 dark:text-white font-bold focus:bg-white dark:focus:bg-gray-600 focus:ring-2 focus:border-transparent outline-none transition-all focus:ring-emerald-500 lg:text-lg lg:py-5" data-theme-key="ringColor"/>
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-gray-400 dark:text-gray-400 uppercase tracking-wider mb-2 pl-1 lg:text-sm">Viajes por día</label>
+                                <div class="flex items-center gap-4 bg-gray-50 dark:bg-gray-700 rounded-xl p-2 border border-gray-100 dark:border-gray-600 lg:p-3">
+                                    <button id="btn-planner-dec" tabindex="0" class="w-10 h-10 lg:w-12 lg:h-12 flex items-center justify-center bg-white dark:bg-gray-600 rounded-lg shadow-sm text-gray-500 dark:text-white hover:text-gray-800 dark:hover:text-gray-200 transition-colors active:scale-95 focus:outline-none focus:ring-2 focus:ring-gray-300">-</button>
+                                    <span id="label-planner-viajes" class="flex-1 text-center font-bold text-2xl lg:text-3xl text-gray-800 dark:text-white">2</span>
+                                    <button id="btn-planner-inc" tabindex="0" class="w-10 h-10 lg:w-12 lg:h-12 flex items-center justify-center bg-white dark:bg-gray-600 rounded-lg shadow-sm text-gray-500 dark:text-white hover:text-gray-800 dark:hover:text-gray-200 transition-colors active:scale-95 focus:outline-none focus:ring-2 focus:ring-gray-300">+</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="planner-results" class="space-y-4 animate-fade-in-up">
+                           <!-- Injected by JS -->
+                        </div>
+                    </div>
+
+                </div> <!-- End Right Column -->
+
+            </main> <!-- End Main Grid -->
+
+            <!-- Toast Notification -->
+            <div id="toast-container" class="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 pointer-events-none lg:bottom-12"></div>
+
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module" src="/js/main.js"></script>
+    
+    <!-- Template for History Item (hidden) -->
+    <template id="history-item-template">
+        <div tabindex="0" class="group flex items-center justify-between p-4 bg-white dark:bg-gray-800 rounded-2xl hover:shadow-md transition-all border border-gray-50 dark:border-gray-700 hover:border-gray-100 dark:hover:border-gray-600 focus:outline-none focus:ring-4 focus:ring-offset-1 focus:ring-gray-200 lg:p-5">
+            <div class="flex items-center gap-4 lg:gap-6">
+                <div class="icon-container w-10 h-10 lg:w-12 lg:h-12 rounded-2xl flex items-center justify-center shadow-sm">
+                    <!-- Icon SVG injected -->
+                </div>
+                <div>
+                   <p class="item-desc text-xs font-bold text-gray-800 dark:text-white mb-0.5 lg:text-sm"></p>
+                   <p class="item-date text-[10px] text-gray-400 font-medium lg:text-xs"></p>
+                </div>
+            </div>
+            <span class="item-amount font-mono font-bold text-sm lg:text-base"></span>
+        </div>
+    </template>
+</body>
+</html>
