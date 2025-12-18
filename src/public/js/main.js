@@ -152,19 +152,22 @@ async function init() {
 
 function setupEventListeners() {
     // Login
-    document.getElementById('login-form').addEventListener('submit', (e) => {
-        e.preventDefault();
-        const input = document.getElementById('userIdInput').value.trim();
-        if (input.length > 2) {
-            const cleanId = input.toLowerCase().replace(/\s+/g, '-');
-            state.userId = cleanId;
-            localStorage.setItem('transmi_user_id', cleanId);
-            showApp();
-            if (state.currentUser) subscribeToData();
-        } else {
-            showToast('Ingresa un nombre válido', 'error');
-        }
-    });
+    const loginForm = document.getElementById('login-form');
+    if (loginForm) {
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault(); // CRITICAL: Prevent reload
+            const input = document.getElementById('userIdInput').value.trim();
+            if (input.length > 2) {
+                const cleanId = input.toLowerCase().replace(/\s+/g, '-');
+                state.userId = cleanId;
+                localStorage.setItem('transmi_user_id', cleanId);
+                showApp();
+                if (state.currentUser) subscribeToData();
+            } else {
+                showToast('Ingresa un nombre válido', 'error');
+            }
+        });
+    }
 
     // Logout
     document.getElementById('logout-btn').addEventListener('click', () => {
@@ -698,4 +701,7 @@ function toggleMode() {
     applyThemeMode(modes[nextIdx]);
 }
 
-window.toggleMode = toggleMode; // Expose for HTML click if needed, though we add listener
+window.toggleMode = toggleMode;
+
+// Initialize App
+document.addEventListener('DOMContentLoaded', init);
